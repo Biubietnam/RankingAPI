@@ -22,19 +22,22 @@ async def promote_user(user_name: str, key: str, groupid: int):
     if key == APIKEY:
         try:
             group = await client.get_group(groupid)
+            logger.info(f"Group fetched: {group}")
             usernameinsystem = await client.get_user_by_username(user_name)
+            logger.info(f"User fetched: {usernameinsystem}")
             if not usernameinsystem:
                 raise HTTPException(status_code=404, detail="User not found")
             
             user_id = usernameinsystem.id
             membertorank = await group.get_member_by_id(user_id)
+            logger.info(f"Member fetched: {membertorank}")
             if not membertorank:
                 raise HTTPException(status_code=404, detail="Member not found in group")
             
             await membertorank.promote()
             return {"message": "The user was promoted!"}
         except Exception as e:
-            logger.error(f"Error promoting user: {e}")
+            logger.error(f"Error promoting user: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Internal Server Error")
     else:
         raise HTTPException(status_code=403, detail="Incorrect key")
@@ -44,19 +47,22 @@ async def demote_user(user_name: str, key: str, groupid: int):
     if key == APIKEY:
         try:
             group = await client.get_group(groupid)
+            logger.info(f"Group fetched: {group}")
             usernameinsystem = await client.get_user_by_username(user_name)
+            logger.info(f"User fetched: {usernameinsystem}")
             if not usernameinsystem:
                 raise HTTPException(status_code=404, detail="User not found")
             
             user_id = usernameinsystem.id
             membertorank = await group.get_member_by_id(user_id)
+            logger.info(f"Member fetched: {membertorank}")
             if not membertorank:
                 raise HTTPException(status_code=404, detail="Member not found in group")
             
             await membertorank.demote()
             return {"message": "The user was demoted!"}
         except Exception as e:
-            logger.error(f"Error demoting user: {e}")
+            logger.error(f"Error demoting user: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Internal Server Error")
     else:
         raise HTTPException(status_code=403, detail="Incorrect key")
@@ -66,14 +72,16 @@ async def rank_user(user_name: str, key: str, groupid: int, role_number: int):
     if key == APIKEY:
         try:
             group = await client.get_group(groupid)
+            logger.info(f"Group fetched: {group}")
             target = await group.get_member_by_username(user_name)
+            logger.info(f"Member fetched: {target}")
             if not target:
                 raise HTTPException(status_code=404, detail="User not found in group")
             
             await target.setrole(role_number)
             return {"message": "The user had their rank changed"}
         except Exception as e:
-            logger.error(f"Error ranking user: {e}")
+            logger.error(f"Error ranking user: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Internal Server Error")
     else:
         raise HTTPException(status_code=403, detail="Incorrect key")
@@ -83,9 +91,10 @@ async def group_members(key: str, groupid: int):
     if key == APIKEY:
         try:
             group = await client.get_group(groupid)
+            logger.info(f"Group fetched: {group}")
             return {"member_count": group.member_count}
         except Exception as e:
-            logger.error(f"Error fetching group members: {e}")
+            logger.error(f"Error fetching group members: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Internal Server Error")
     else:
         raise HTTPException(status_code=403, detail="Incorrect key")
